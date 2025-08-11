@@ -2,8 +2,8 @@ package dao;
 
 import model.User;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import utils.HibernateUtil;
 
 import java.util.List;
 import java.util.logging.Level;
@@ -13,9 +13,15 @@ public class UserDao {
 
     private static final Logger logger = Logger.getLogger(UserDao.class.getName());
 
+    private final SessionFactory sessionFactory;
+
+    public UserDao(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
+
     public Long create(User user) {
         Transaction tx = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             tx = session.beginTransaction();
             session.persist(user);
             tx.commit();
@@ -31,7 +37,7 @@ public class UserDao {
     }
 
     public User findById(Long id) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             User user = session.get(User.class, id);
             if (user != null) {
                 logger.info("Получен пользователь: ID=" + id);
@@ -46,7 +52,7 @@ public class UserDao {
     }
 
     public List<User> findAll() {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             List<User> users = session.createQuery("FROM User", User.class).list();
             logger.info("Получено пользователей: " + users.size());
             return users;
@@ -58,7 +64,7 @@ public class UserDao {
 
     public boolean update(User user) {
         Transaction tx = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             tx = session.beginTransaction();
             session.merge(user);
             tx.commit();
@@ -75,7 +81,7 @@ public class UserDao {
 
     public boolean delete(Long id) {
         Transaction tx = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             tx = session.beginTransaction();
             User user = session.get(User.class, id);
             if (user != null) {

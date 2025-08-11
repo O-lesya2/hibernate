@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 public class Main {
 
-    private static final UserService userService = new UserService(new UserDao());
+    private static final UserService userService = new UserService(new UserDao(HibernateUtil.getSessionFactory()));
 
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
