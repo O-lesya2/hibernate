@@ -13,18 +13,20 @@ public class UserDao {
 
     private static final Logger logger = Logger.getLogger(UserDao.class.getName());
 
-    public void create(User user) {
+    public Long create(User user) {
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
             session.persist(user);
             tx.commit();
             logger.info("Создан пользователь: ID=" + user.getId());
+            return user.getId();
         } catch (Exception e) {
             if (tx != null) {
                 tx.rollback();
             }
             logger.log(Level.SEVERE, "Ошибка при создании пользователя", e);
+            return null;
         }
     }
 
@@ -54,38 +56,43 @@ public class UserDao {
         }
     }
 
-    public void update(User user) {
+    public boolean update(User user) {
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
             session.merge(user);
             tx.commit();
             logger.info("Обновлён пользователь: ID=" + user.getId());
+            return true;
         } catch (Exception e) {
             if (tx != null) {
                 tx.rollback();
             }
             logger.log(Level.SEVERE, "Ошибка при обновлении пользователя", e);
+            return false;
         }
     }
 
-    public void delete(Long id) {
+    public boolean delete(Long id) {
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
             User user = session.get(User.class, id);
             if (user != null) {
                 session.remove(user);
+                tx.commit();
                 logger.info("Удалён пользователь: ID=" + id);
+                return true;
             } else {
                 logger.warning("Не найден пользователь для удаления: ID=" + id);
+                return false;
             }
-            tx.commit();
         } catch (Exception e) {
             if (tx != null) {
                 tx.rollback();
             }
             logger.log(Level.SEVERE, "Ошибка при удалении пользователя", e);
+            return false;
         }
     }
 }

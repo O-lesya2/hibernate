@@ -1,12 +1,12 @@
-import dao.UserDao;
 import model.User;
+import service.UserService;
 import utils.HibernateUtil;
 
 import java.util.Scanner;
 
 public class Main {
 
-    private static final UserDao userDao = new UserDao();
+    private static final UserService userService = new UserService();
 
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
@@ -14,14 +14,14 @@ public class Main {
 
         while (running) {
             System.out.println("""
-                \nВыберите операцию:
-                1. Добавить пользователя
-                2. Показать пользователя по ID
-                3. Показать всех пользователей
-                4. Обновить пользователя
-                5. Удалить пользователя
-                6. Выход
-                """);
+                    \nВыберите операцию:
+                    1. Добавить пользователя
+                    2. Показать пользователя по ID
+                    3. Показать всех пользователей
+                    4. Обновить пользователя
+                    5. Удалить пользователя
+                    6. Выход
+                    """);
 
             switch (sc.nextLine()) {
                 case "1" -> {
@@ -32,35 +32,49 @@ public class Main {
                     System.out.print("Возраст: ");
                     int age = Integer.parseInt(sc.nextLine());
 
-                    userDao.create(new User(name, email, age));
+                    Long id = userService.create(name, email, age);
+                    if (id != null) {
+                        System.out.println("Пользователь сохранён, id=" + id);
+                    } else {
+                        System.out.println("Ошибка при сохранении пользователя");
+                    }
                 }
                 case "2" -> {
                     System.out.print("ID: ");
-                    Long id = Long.parseLong(sc.nextLine());
-                    System.out.println(userDao.findById(id));
+                    long id = Long.parseLong(sc.nextLine());
+                    User user = userService.getById(id);
+                    if (user != null) {
+                        System.out.println(user);
+                    } else {
+                        System.out.println("Пользователь не найден");
+                    }
                 }
-                case "3" -> userDao.findAll().forEach(System.out::println);
+                case "3" -> userService.getAllUsers().forEach(System.out::println);
                 case "4" -> {
                     System.out.print("ID пользователя: ");
-                    Long id = Long.parseLong(sc.nextLine());
-                    User user = userDao.findById(id);
-                    if (user == null) {
-                        System.out.println("Пользователь не найден");
-                        break;
-                    }
+                    long id = Long.parseLong(sc.nextLine());
 
                     System.out.print("Новое имя: ");
-                    user.setName(sc.nextLine());
+                    String name = sc.nextLine();
                     System.out.print("Новый email: ");
-                    user.setEmail(sc.nextLine());
+                    String email = sc.nextLine();
                     System.out.print("Новый возраст: ");
-                    user.setAge(Integer.parseInt(sc.nextLine()));
-                    userDao.update(user);
+                    int age = Integer.parseInt(sc.nextLine());
+
+                    if (userService.update(id, name, email, age)) {
+                        System.out.println("Пользователь обновлён");
+                    } else {
+                        System.out.println("Ошибка при обновлении");
+                    }
                 }
                 case "5" -> {
                     System.out.print("ID пользователя: ");
                     Long id = Long.parseLong(sc.nextLine());
-                    userDao.delete(id);
+                    if (userService.delete(id)) {
+                        System.out.println("Пользователь удалён");
+                    } else {
+                        System.out.println("Ошибка при удалении");
+                    }
                 }
                 case "6" -> {
                     running = false;
