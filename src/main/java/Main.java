@@ -1,3 +1,4 @@
+import dao.UserDao;
 import model.User;
 import service.UserService;
 import utils.HibernateUtil;
@@ -6,7 +7,7 @@ import java.util.Scanner;
 
 public class Main {
 
-    private static final UserService userService = new UserService();
+    private static final UserService userService = new UserService(new UserDao());
 
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
